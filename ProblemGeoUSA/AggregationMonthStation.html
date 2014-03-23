@@ -23,11 +23,11 @@
         var timeParser = d3.time.format("%b %-d, %Y %X %p");
         var months = {}
 
-        //for (var key in data) {
-            var obj = data["690150"]
-            console.log(obj)
+        for (var keyme in data) {
+            var obj = data[keyme]
+            //console.log(obj)
 
-            var keyme = "690150"
+            //var keyme = "690150"
 
             for (var key2 in obj) {
                 //var month
@@ -40,47 +40,40 @@
 
                 //console.log(month)
                 var monthList = months[month] // get the value for key "firstLetter"
-                    if (monthList==undefined) {// if there is no entry yet...
-                        monthList = []
-                        
-                        //monthList.push(keyme)
-                        monthList[keyme] = {sum:0,hourly: {}}; //  .. then create one !!
-                        months[month]= monthList
-                        }
-                        
-                    else {// if there is no entry yet...
-                        
-                        //monthList.push(keyme)
-                        monthList[keyme] = {sum:0,hourly: {}}; //  .. then create one !!
-                        months[month]= monthList
-                        }
-                        //months[month]= monthList
-
-
-
-/*
-                    var locationList = monthList[keyme]
-                    if (locationList==undefined) {// if there is no entry yet...
-                    //locationList = []; //  .. then create one !! 
-                    //locationList[keyme] = {sum: 0, hourly: {}}
-                    specificList = {sum:0,hourly: {}}
-                    //specificList[keyme] = {sum:0,hourly: {}}
-                    //locationList.push(specificList)
-                    monthList.push(keyme)
+                if (monthList==undefined) {// if there is no entry yet...
+                    monthList = {}
+                    months[month]= monthList
                     }
-                    //months[month]= monthList
-*/
 
-                    //}
+                var stationList = months[month][keyme]
+                if (stationList==undefined) {// if there is no entry yet...
+                    stationList = {}
+                    months[month][keyme]= stationList
+                    }
 
-                    //monthList.push("6901") // add name to monthList
-                                //if allDates
+                var valuesList = months[month][keyme]["sum"] 
+                if (valuesList==undefined) {// if there is no entry yet...
+                    valuesList = {}
+                    months[month][keyme]["sum"] = value
+                    months[month][keyme]["hourly"] = valuesList
+                    }
+
+                else { months[month][keyme]["sum"] += value }
+
+                var hourlyList = months[month][keyme]["hourly"][hour]
+                if (hourlyList==undefined) {// if there is no entry yet...
+                    //months[month][keyme]["hourly"] = {}
+                    months[month][keyme]["hourly"][hour] = value 
+                    }
+
+                else { months[month][keyme]["hourly"][hour] += value }
+        
             }
-            console.log(months)
-        //}
+        }
+        console.log(months)
 		// add your source code
 
-        saveToFile(reducedDataSet,"reducedMonthStationHour2003_2004.json")
+        saveToFile(months,"reducedMonthStationHour2003_2004.json")
 
 
 
