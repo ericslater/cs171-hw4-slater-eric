@@ -89,6 +89,26 @@
     }
 
 
+
+        //var coords = {x: [], y: []}
+        var mapme
+        coords2 = []
+        //var y = []
+        
+        for (var info in data) {
+
+        var locats = data[info]
+
+        mapme = projection([locats["NSRDB_LON(dd)"], locats["NSRDB_LAT (dd)"]])
+        //console.log(projection([locats["NSRDB_LON(dd)"], locats["NSRDB_LAT (dd)"]]))
+        
+        if (mapme !== null) {
+        coords.x.push(mapme[0])
+        coords.y.push(mapme[1])
+        //coords2.push(coords)
+        }
+    }
+
 </script>
 
 
