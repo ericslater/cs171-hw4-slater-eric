@@ -78,6 +78,7 @@ function loadStations() {
 
             var filteredData = data.filter(notNull)
             console.log(filteredData)
+
             svg.selectAll("circle")
             .data(filteredData)
             .enter()
@@ -101,10 +102,33 @@ function loadStations() {
                     return "grey";
                 else
                     return "blue";
-            });
+            })
+
+
+            d3.selectAll("circle").on("mouseover", function(d) {
+        var xPosition = width - 500;
+        var yPosition = 60;
+
+        // Update the tooltip position and value
+        d3.select("#tooltip")
+          .style("left", xPosition + "px")
+          .style("top", yPosition + "px")
+          .select("#value")
+          .html("hello world");
+
+          // Show the tooltip
+          d3.select("#tooltip").classed("hidden", false);
+          console.log("something happened")
         })
-    });
-}
+
+        .on("mouseout", function() {
+          // Hide the tooltip
+          d3.select("#tooltip").classed("hidden", true);
+        })
+            })
+        })
+    };
+
 
 
 function loadStats() {
