@@ -103,18 +103,26 @@ function loadStations() {
                 else
                     return "blue";
             })
+            .attr("id", function(locats) {
+                return locats["USAF"]
+            });
 
 
-            d3.selectAll("circle").on("mouseover", function(d) {
+        d3.selectAll("circle").on("mouseover", function(d) {
+        
+            console.log(d)
+
         var xPosition = width - 500;
         var yPosition = 60;
 
         // Update the tooltip position and value
         d3.select("#tooltip")
-          .style("left", xPosition + "px")
-          .style("top", yPosition + "px")
+          .style("left", width + 120 + "px")
+          //.style("top", "100px")
           .select("#value")
-          .html("hello world");
+          .html('<div>' + 'Station: ' + d["STATION"] + '</div>' 
+                + '<div>' + 'Station ID: ' + d["USAF"] + '</div>'
+            );
 
           // Show the tooltip
           d3.select("#tooltip").classed("hidden", false);
