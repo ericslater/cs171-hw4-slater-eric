@@ -13,6 +13,9 @@ var width = 1060 - margin.left - margin.right;
 var height = 800 - margin.bottom - margin.top;
 var centered;
 
+var visHeight = 300
+var visWidth = 300
+
 var bbVis = {
     x: 100,
     y: 10,
@@ -21,9 +24,35 @@ var bbVis = {
 };
 
 var detailVis = d3.select("#detailVis").append("svg").attr({
-    width:350,
-    height:200
+    width:400,
+    height:325
 })
+    .append("g")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+dailyHours = ["12:00 AM", "1:00 AM", "2:00 AM", "3:00 AM", "4:00 AM", "5:00 AM", "6:00 AM", "7:00 AM", 
+                "8:00 AM", "9:00 AM", "10:00 AM", "11:00 AM", "12:00 PM", "1:00 PM", "2:00 PM",
+                "3:00 PM", "4:00 PM", "5:00 PM", "6:00 PM", "7:00 PM", "8:00 PM", "9:00 PM", "10:00 PM", 
+                "11:00 PM"]
+
+console.log(dailyHours)
+// vis scale
+var xVis = d3.scale.ordinal()
+    .domain(dailyHours)
+    .rangeRoundBands([0, visWidth], 0.05);
+
+var yVis = d3.scale.linear()
+    .range([200, 0]);
+    
+// vis axes
+var xAxis = d3.svg.axis()
+    .scale(xVis)
+    .orient("bottom");
+
+var yAxis = d3.svg.axis()
+    .scale(yVis)
+    .orient("left")
+    .ticks(10);
 
 var canvas = d3.select("#vis").append("svg").attr({
     width: width + margin.left + margin.right,
@@ -43,6 +72,7 @@ var dataSet = {};
 
 var scaleMe
 
+// going to use these to find min and max values
 var min = Infinity
 var max = -Infinity
 
@@ -50,35 +80,97 @@ function loadStations() {
     d3.csv("../data/NSRDB_StationsMeta.csv",function(error,data){
         d3.json("../data/reducedMonthStationHour2003_2004.json", function(error,data2){
 
-            var totalSum = {}
+            // because the directions were somewhat misleading, I have all of my data
+            // grouped monthly as shown in the homework diagram, but now we will make
+            // it aggregate, no biggie!
+            var totalSum = {sum: {}, hourly: {}}
             for (var months in data2) {
                 for (var locats in data2[months]) {
-                    //console.log(data2["0"]["700197"])
-                    if (totalSum[locats] == undefined)
-                        totalSum[locats] = data2[months][locats]["sum"]
+                    //console.log(totalSum.sum)
+                    if (totalSum.sum[locats] == undefined)
+                        totalSum.sum[locats] = data2[months][locats]["sum"]
                     else
-                        totalSum[locats] += data2[months][locats]["sum"]
+                        totalSum.sum[locats] += data2[months][locats]["sum"]
+
+                    for (var hours in data2[months][locats]["hourly"]) {
+                        if (totalSum.hourly[locats] == undefined)
+                            totalSum.hourly[locats] = {}
+
+                        if (totalSum.hourly[locats][hours] == undefined)
+                            totalSum.hourly[locats][hours] = data2[months][locats]["hourly"][hours]
+                        else 
+                            totalSum.hourly[locats][hours] += data2[months][locats]["hourly"][hours]
+                    }
                 }
             }
-            console.log(totalSum)
 
-            for( x in totalSum) {
-                if( totalSum[x] < min && totalSum[x] !== 0) min = totalSum[x];
-                if( totalSum[x] > max) max = totalSum[x];
+
+            hrArray = []
+
+            for (var hour in totalSum.hourly["726575"]) {
+                hrArray.push(totalSum.hourly["726575"][hour])
             }
 
+            //xVis.domain([0,11]);
+            yVis.domain([0, d3.max(hrArray)]);
+
+            console.log(totalSum)
+            console.log(data)
+
+            detailVis.append("g")
+                .attr("class", "x axis")
+                .attr("transform", "translate(0," + 200 + ")")
+                .call(xAxis)
+              .selectAll("text")
+                .attr("y", 5)
+                .attr("x", -10)
+                .attr("dy", ".35em")
+                .attr("transform", "rotate(-60)")
+                .style("text-anchor", "end");
+
+            detailVis.append("g")
+                .attr("class", "y axis")
+                .attr("transform", "translate("+ 300 +",0)")
+                .call(yAxis)
+              .selectAll("text")
+                //.attr("y", 5)
+                .attr("x", 3)
+                .attr("dy", ".35em")
+                .style("text-anchor", "start");
+
+                console.log(totalSum.hourly["726575"])
+
+            detailVis.selectAll(".bar")
+                .data(hrArray)
+              .enter().append("rect")
+                .attr("class", "bar")
+                .attr("x", function(d, i) { 
+                    console.log(d); return xVis(dailyHours[i]);
+                    })
+                .attr("width", xVis.rangeBand())
+                .attr("y", function(d) { return yVis(d); })
+                .attr("height", function(d) { 
+
+                    return 200 - yVis(d); }); 
+
+                console.log(detailVis.width)
+
+            // find the min and max    
+            for( x in totalSum.sum) {
+                if( totalSum.sum[x] < min && totalSum.sum[x] !== 0) min = totalSum.sum[x];
+                if( totalSum.sum[x] > max) max = totalSum.sum[x];
+            }
+            // define our scale
             scaleMe = d3.scale.linear().domain([min,max]).range([2,6])
 
-            console.log(data2)
+            // make sure we don't have any null values
             function notNull(e) {
                 if (projection([e["NSRDB_LON(dd)"], e["NSRDB_LAT (dd)"]]) !== null)
                     return e;
             }
-
-
             var filteredData = data.filter(notNull)
-            console.log(filteredData)
 
+            // append our circles with correct locations onto the map
             svg.selectAll("circle")
             .data(filteredData)
             .enter()
@@ -90,14 +182,14 @@ function loadStations() {
                 return projection([locats["NSRDB_LON(dd)"], locats["NSRDB_LAT (dd)"]])[1]
                       })
             .attr("r", function(locats) { 
-                var sumMe = totalSum[locats["USAF"]]
+                var sumMe = totalSum.sum[locats["USAF"]]
                 if (sumMe == undefined || sumMe == 0)
                     return 1.5;
                 else
-                    return scaleMe(totalSum[locats["USAF"]])
+                    return scaleMe(totalSum.sum[locats["USAF"]])
             })
             .style("fill", function(locats) {
-                var sumMe = totalSum[locats["USAF"]]
+                var sumMe = totalSum.sum[locats["USAF"]]
                 if (sumMe == undefined || sumMe == 0)
                     return "grey";
                 else
@@ -105,37 +197,35 @@ function loadStations() {
             })
             .attr("id", function(locats) {
                 return locats["USAF"]
-            });
-
-
-        d3.selectAll("circle").on("mouseover", function(d) {
-        
-            console.log(d)
-
-        var xPosition = width - 500;
-        var yPosition = 60;
-
-        // Update the tooltip position and value
-        d3.select("#tooltip")
-          .style("left", width + 120 + "px")
-          //.style("top", "100px")
-          .select("#value")
-          .html('<div>' + 'Station: ' + d["STATION"] + '</div>' 
-                + '<div>' + 'Station ID: ' + d["USAF"] + '</div>'
-            );
-
-          // Show the tooltip
-          d3.select("#tooltip").classed("hidden", false);
-          console.log("something happened")
-        })
-
-        .on("mouseout", function() {
-          // Hide the tooltip
-          d3.select("#tooltip").classed("hidden", true);
-        })
             })
-        })
-    };
+            //.on("click", updateDetailVis);
+
+            d3.selectAll("circle").on("mouseover", function(d) {
+
+            var xPosition = width + 120;
+            var yPosition = 60;
+
+            // Update the tooltip position and value
+            d3.select("#tooltip")
+              .style("left", xPosition + "px")
+              //.style("top", "100px")
+              .select("#value")
+              .html('<div>' + 'Station: ' + d["STATION"] + '</div>' 
+                    + '<div>' + 'Total lux: ' + totalSum.sum[d["USAF"]].toLocaleString() + '</div>'
+                );
+
+              // Show the tooltip
+              d3.select("#tooltip").classed("hidden", false);
+              console.log("something happened")
+            })
+
+            .on("mouseout", function() {
+              // Hide the tooltip
+              d3.select("#tooltip").classed("hidden", true);
+            })
+                })
+            })
+        };
 
 
 
@@ -173,9 +263,12 @@ var createDetailVis = function(){
 }
 
 
-var updateDetailVis = function(data, name){
-  
+var updateDetailVis = function(data){
+    console.log(data)
+
+
 }
+
 
 function clicked(d) {
   var x, y, k;
