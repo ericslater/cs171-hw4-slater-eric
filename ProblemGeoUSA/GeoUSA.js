@@ -157,13 +157,13 @@ function loadStations() {
 
             // bar chart title/Location
             var myTitle = detailVis.append("svg:text")
-                                    .text(startPointName)
+                                    .text(startPointName);
 
             var myBiggerTitle = svg.append("svg:text")
                                     .text("National Solar Radiation Stations and Data (2003-2004)")
                                     .attr("dx", width/2 - 300 + "px")
                                     .attr("dy", height/10 + "px")
-                                    .attr("id", "myLovelyTitle")
+                                    .attr("id", "myLovelyTitle");
 
             // find the min and max    
             for( x in totalSum.sum) {
@@ -216,12 +216,11 @@ function loadStations() {
                 if (totalSum.sum[d["USAF"]] !== undefined) {
 
                     hrArray = []
+                    console.log("CS 171 is awesome!");
 
                     for (var hour in totalSum.hourly[d["USAF"]]) {
                         hrArray.push(totalSum.hourly[d["USAF"]][hour])
                     }
-
-                    console.log(d3.max(hrArray))
 
                     // update domain
                     yVis.domain([0, d3.max(hrArray)]);
@@ -232,7 +231,7 @@ function loadStations() {
                         .transition()
                         .duration(1000)
                         .attr("x", function(d, i) { 
-                            console.log(d); return xVis(dailyHours[i]);
+                            return xVis(dailyHours[i]);
                             })
                         .attr("y", function(d) { return yVis(d); })
                         .attr("height", function(d) { 
