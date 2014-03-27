@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
+<title>Hello, World</title>
 <head>
-    <title></title>
     <div id="tooltip" class="hidden">
         <p><span id="value">100</span></p>  
     </div>
@@ -11,6 +11,7 @@
 <body>
 <script src="http://d3js.org/d3.v3.min.js"></script>
 <script src="http://d3js.org/topojson.v1.min.js"></script>
+<script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
 <style type="text/css">
     svg{
         /*background: #eeeeee;*/
@@ -74,11 +75,20 @@
     }
 
     #states {
-      fill: #aaa;
+      fill: #9AC77D;
     }
 
     #states .active {
-      fill: orange;
+      fill: #61A8DB;
+    }
+
+    #state-borders {
+      fill: none;
+      stroke: #fff;
+      stroke-width: 1.5px;
+      stroke-linejoin: round;
+      stroke-linecap: round;
+      pointer-events: none;
     }
 
       #tooltip {
@@ -105,7 +115,46 @@
       font-family: sans-serif;
       font-size: 16px;
       line-height: 20px;
+      color: #7599B3;
     }
+
+
+
+
+    .d3-tip {
+  line-height: 1;
+  font-weight: bold;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.8);
+  color: #fff;
+  border-radius: 2px;
+}
+
+/* Creates a small triangle extender for the tooltip */
+.d3-tip:after {
+  box-sizing: border-box;
+  display: inline;
+  font-size: 10px;
+  width: 100%;
+  line-height: 1;
+  color: rgba(0, 0, 0, 0.8);
+  content: "\25BC";
+  position: absolute;
+  text-align: center;
+}
+
+/* Style northward tooltips differently */
+.d3-tip.n:after {
+  margin: -1px 0 0 0;
+  top: 100%;
+  left: 0;
+}
+
+#myLovelyTitle {
+    font-weight: bold;
+    font: garamond;
+    font-size: 24px;
+}
 
 
 
@@ -115,11 +164,11 @@
 
 <table>
     <tr><td><div id="vis"></div></td>
-
-    <td><div id="detailVis"></div>
+        <td><div id="detailVis"></div>
+    <p style="text-align: center; font-weight: bolder;" >             Hour of Day v. Amount of Solar Radiation (lux)</p>
     </td></tr>
-    
 </table>
+    <title>Hello World</title>
 
 
 <script src="GeoUSA.js"></script>
