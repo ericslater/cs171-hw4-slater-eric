@@ -80,6 +80,7 @@ function loadStations() {
     d3.csv("../data/NSRDB_StationsMeta.csv",function(error,data){
         d3.json("../data/reducedMonthStationHour2003_2004.json", function(error,data2){
 
+
             // because the directions were somewhat misleading, I have all of my data
             // grouped monthly as shown in the homework diagram, but now we will make
             // it aggregate, no biggie!
@@ -105,11 +106,13 @@ function loadStations() {
             }
 
 
-            hrArray = []
+            var hrArray = []
 
             for (var hour in totalSum.hourly["726575"]) {
                 hrArray.push(totalSum.hourly["726575"][hour])
             }
+
+            console.log(data)
 
             //xVis.domain([0,11]);
             yVis.domain([0, d3.max(hrArray)]);
@@ -152,6 +155,17 @@ function loadStations() {
                 .attr("height", function(d) { 
 
                     return 200 - yVis(d); }); 
+
+
+        /*var myTitle = detailVis.selectAll("text.title")
+                .data(["title"])
+                .enter()
+                .append("text")
+                .attr("class", "title")
+                */ var startPoint = "MINNEAPOLIS/CRYSTAL"
+
+            var myTitle = detailVis.append("svg:text")
+                                    .text(startPoint)
 
                 console.log(detailVis.width)
 
@@ -198,7 +212,54 @@ function loadStations() {
             .attr("id", function(locats) {
                 return locats["USAF"]
             })
-            //.on("click", updateDetailVis);
+
+            d3.selectAll("circle").on("click", function(d) {
+                if (totalSum.sum[d["USAF"]] !== undefined) {
+
+                hrArray = []
+                console.log(d)
+
+                for (var hour in totalSum.hourly[d["USAF"]]) {
+                    hrArray.push(totalSum.hourly[d["USAF"]][hour])
+                }
+
+                console.log(d3.max(hrArray))
+
+                //xVis.domain([0,11]);
+                yVis.domain([0, d3.max(hrArray)]);
+
+                  detailVis.selectAll(".bar")
+                    .data(hrArray)
+                    .transition()
+                    .duration(1000)
+                    .attr("x", function(d, i) { 
+                        console.log(d); return xVis(dailyHours[i]);
+                        })
+                    .attr("y", function(d) { return yVis(d); })
+                    .attr("height", function(d) { 
+
+                        return 200 - yVis(d); }); 
+
+
+                //Update Y axis
+                detailVis.select(".y.axis")
+                    .transition()
+                    .duration(1000)
+                    .call(yAxis)
+                    .selectAll("text")
+                    .attr("x", 3)
+                    .attr("dy", ".35em")
+                    .style("text-anchor", "start");
+
+                detailVis.select(".title")
+                    .data(["title"])
+                    .selectAll("text")
+                    .transition()
+                    
+                    console.log(myTitle)
+                    myTitle.text(d["STATION"])
+            }
+            })
 
             d3.selectAll("circle").on("mouseover", function(d) {
 
@@ -225,6 +286,7 @@ function loadStations() {
             })
                 })
             })
+
         };
 
 
@@ -255,12 +317,6 @@ d3.json("../data/us-named.json", function(error, data) {
     loadStats();
 });
 
-
-
-// ALL THESE FUNCTIONS are just a RECOMMENDATION !!!!
-var createDetailVis = function(){
-
-}
 
 
 var updateDetailVis = function(data){
