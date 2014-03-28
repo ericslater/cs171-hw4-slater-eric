@@ -304,7 +304,6 @@ function loadStations() {
 
 
 d3.json("../data/us-named.json", function(error, data) {
-
     var usMap = topojson.feature(data,data.objects.states).features
 
     // give our states and have id's so we can highlight
@@ -314,10 +313,7 @@ d3.json("../data/us-named.json", function(error, data) {
         .data(usMap).enter().append("path")
         .attr("d", path)
         .attr("id", "states")
-        .on("click", clicked)
-        .on("mouseover", function(d) {
-            d3.select(this).attr("fill", "red")
-        });
+        .on("click", clicked);
 
     loadStations();
 });
